@@ -99,3 +99,18 @@ def plot_radar_chart(criteria_list, data, labels):
 ```
 
 ## Some of the Streamlit app workflows 
+**Conduct Pairwise Comparisons**
+```python
+comparison_matrix = create_pairwise_matrix(criteria_list)
+value = st.number_input(...)
+comparison_matrix.iloc[i, j] = value
+comparison_matrix.iloc[j, i] = 1 / value
+```
+**Aggregate Multiple Interviews**
+```python
+final_matrix = np.ones((n_criteria, n_criteria))
+for i in range(n_criteria):
+    for j in range(n_criteria):
+        vals = all_interviews_array[:, i, j]
+        final_matrix[i, j] = geometric_mean(vals)
+```
