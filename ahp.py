@@ -49,7 +49,7 @@ def plot_radar_chart(criteria_list, data, labels):
     st.pyplot(fig)
 
 st.title("AHP Decision-Making Tool")
-st.write("Welcome! This tool will help you through the Analytic Hierarchy Process (AHP).")
+st.write("This tool will help you through the Analytic Hierarchy Process (AHP)")
 
 # Step 1: Define the objective
 st.header("Step 1: Define the objective")
