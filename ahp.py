@@ -2,6 +2,7 @@ import streamlit as st
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import io
 
 def geometric_mean(values):
     product = np.prod(values)
@@ -29,11 +30,6 @@ def create_pairwise_matrix(elements_list):
     return pd.DataFrame(matrix, index=elements_list, columns=elements_list)
 
 def plot_radar_chart(criteria_list, data, labels):
-    """
-    criteria_list: list of criteria (axes of the radar)
-    data: list of array with values for each criteria of each alternative
-    labels: names of alternatives
-    """
     N = len(criteria_list)
     angles = np.linspace(0, 2 * np.pi, N, endpoint=False).tolist()
     angles += angles[:1]
@@ -113,7 +109,9 @@ if criteria and alternatives:
 # Step 5: Pairwise comparisons for criteria
 st.header("Step 5: Pairwise Comparisons for Criteria")
 num_interviews = st.number_input("Number of interviews to conduct (N):", min_value=1, step=1, value=1)
-st.write("Enter the pairwise comparison values for the criteria for each interview.")
+st.write("Use the slider (1 to 9) to indicate how many times more important one criterion is compared to the other.")
+st.write("If you select the left criterion as more important and choose a number > 1, that means left criterion is that many times more important.")
+st.write("If you select the right criterion, the value is inverted accordingly.")
 
 if criteria:
     n_criteria = len(criteria_list)
@@ -125,11 +123,31 @@ if criteria:
 
         for i in range(n_criteria):
             for j in range(i + 1, n_criteria):
-                value = st.number_input(
-                    f"How important is '{criteria_list[i]}' compared to '{criteria_list[j]}'? (Interview {interview_id + 1})",
-                    min_value=0.1, max_value=9.0, step=0.1, format="%.1f",
-                    key=f"crit-{interview_id}-{i}-{j}"
+                st.write(f"Comparing: {criteria_list[i]} vs {criteria_list[j]}")
+                preference = st.radio(
+                    "Which criterion is more important?",
+                    options=[f"{criteria_list[i]} (left)", "Equal", f"{criteria_list[j]} (right)"],
+                    index=1,  # Default to Equal
+                    key=f"preference-{interview_id}-{i}-{j}"
                 )
+
+                slider_val = st.slider(
+                    "Select importance (1 = equal, 9 = extremely more important)",
+                    min_value=1, max_value=9, value=1, step=1,
+                    key=f"slider-{interview_id}-{i}-{j}"
+                )
+
+                # Interpret slider based on preference
+                if preference == "Equal" or slider_val == 1:
+                    value = 1.0
+                elif preference.startswith(criteria_list[i]):
+                    # Left criterion is more important
+                    value = float(slider_val)
+                else:
+                    # Right criterion is more important
+                    # Invert the value
+                    value = 1.0 / float(slider_val)
+
                 comparison_matrix.iloc[i, j] = value
                 comparison_matrix.iloc[j, i] = 1 / value
 
@@ -166,26 +184,29 @@ if criteria:
             else:
                 st.success("The criteria matrix is consistent!")
 
-            # Save criteria results
-            with open("ahp_criteria_results.txt", "w") as f:
-                f.write("Criteria Results (AHP):\n\n")
-                f.write("Criteria and Priorities:\n")
-                for criterion, pr in zip(criteria_list, priority_vector):
-                    f.write(f"{criterion}: {pr:.4f}\n")
-                f.write("\nConsistency Ratio (CR):\n")
-                f.write(f"{consistency_ratio:.4f}\n")
+            # Prepare results for saving
+            result_text = io.StringIO()
+            result_text.write("Criteria Results (AHP):\n\n")
+            result_text.write("Criteria and Priorities:\n")
+            for criterion, pr in zip(criteria_list, priority_vector):
+                result_text.write(f"{criterion}: {pr:.4f}\n")
+            result_text.write("\nConsistency Ratio (CR):\n")
+            result_text.write(f"{consistency_ratio:.4f}\n")
 
-            st.success("Criteria results saved in 'ahp_criteria_results.txt'.")
+            # Download button for the results
+            st.download_button(
+                label="Download Priority Vector Results",
+                data=result_text.getvalue(),
+                file_name="ahp_criteria_results.txt",
+                mime="text/plain"
+            )
 
             # Calculate weighted values for each alternative (initial_values * priority_vector)
-            # This shows how the initial values change based on criteria priorities.
             weighted_values_matrix = initial_values_matrix.copy()
             for i, c in enumerate(criteria_list):
                 weighted_values_matrix[c] = weighted_values_matrix[c] * priority_vector[i]
 
             # Data preparation for radar plot
-            # Each alternative will have one line. The axes are the criteria, and values are weighted.
             radar_data = [weighted_values_matrix.loc[alt].values for alt in alternatives_list]
 
-            
             plot_radar_chart(criteria_list, radar_data, alternatives_list)
