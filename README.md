@@ -1,4 +1,4 @@
-# AHP-decision-tool
+# AHPy-Decision
 
 This is a Streamlit-based application designed to facilitate the Analytic Hierarchy Process (AHP) for decision-making tasks. The app allows users to define objectives, alternatives, criteria, perform pairwise comparisons, and compute priority vectors and consistency ratios (CR). Results are visualized with radar charts and saved in text files.
 
