@@ -118,12 +118,12 @@ for i in range(n_criteria):
 # Licensing 
 
 This project is licensed under the Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0) license. Under this license, you are free to:
-	•	Share — Copy and redistribute the material in any medium or format.
-	•	Adapt — Remix, transform, and build upon the material.
+1. Share — Copy and redistribute the material in any medium or format.
+2. Adapt — Remix, transform, and build upon the material.
 
 Conditions:
-	1.	NonCommercial: You may not use the material for commercial purposes.
+- NonCommercial: You may not use the material for commercial purposes.
 
 
-If you use the code or any part of it, kindly attribute the authors as follows:
-	•	“This software utilizes components from the AHPy-Decision project (available on GitHub) under the CC BY-NC 4.0 license.”
+If you use the code or any part of it, kindly attribute the authors as as well as this GitHub AHPy-Decision project.
+
